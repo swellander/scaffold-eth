@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Address, Balance, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, Address, Balance, Contract, Mine, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
 import {
@@ -268,6 +268,8 @@ function App(props) {
   const timeLeft = useContractReader(readContracts, "Staker", "timeLeft");
   console.log("⏳ timeLeft:", timeLeft);
 
+  const deadline = useContractReader(readContracts, "Staker", "DEADLINE");
+
   // ** Listen for when the contract has been 'completed'
   const complete = useContractReader(readContracts, "ExampleExternalContract", "completed");
   console.log("✅ complete:", complete);
@@ -479,208 +481,228 @@ function App(props) {
   }
 
   return (
-    <div className="App">
-      {/* ✏️ Edit the header and change the title to your project name */}
-      <Header />
-      {networkDisplay}
-      <BrowserRouter>
-        <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-          <Menu.Item key="/">
-            <Link
-              onClick={() => {
-                setRoute("/");
-              }}
-              to="/"
-            >
-              Staker UI
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/contracts">
-            <Link
-              onClick={() => {
-                setRoute("/contracts");
-              }}
-              to="/contracts"
-            >
-              Debug Contracts
-            </Link>
-          </Menu.Item>
-        </Menu>
+    <Mine
+      timeLeft={timeLeft} 
+      deadline={deadline} 
+    />
+    // <div className="App">
+    //   {/* ✏️ Edit the header and change the title to your project name */}
+    //   <Header />
+    //   {networkDisplay}
+    //   <BrowserRouter>
+    //     <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
+    //       <Menu.Item key="/">
+    //         <Link
+    //           onClick={() => {
+    //             setRoute("/");
+    //           }}
+    //           to="/"
+    //         >
+    //           Staker UI
+    //         </Link>
+    //       </Menu.Item>
+    //       <Menu.Item key="/contracts">
+    //         <Link
+    //           onClick={() => {
+    //             setRoute("/contracts");
+    //           }}
+    //           to="/contracts"
+    //         >
+    //           Debug Contracts
+    //         </Link>
+    //       </Menu.Item>
+    //       <Menu.Item key="/mine">
+    //         <Link
+    //           onClick={() => {
+    //             setRoute("/mine");
+    //           }}
+    //           to="/mine"
+    //         >
+    //           The Cool Tab
+    //         </Link>
+    //       </Menu.Item>
+    //     </Menu>
 
-        <Switch>
-          <Route exact path="/">
-            {completeDisplay}
+    //     <Switch>
+    //       <Route exact path="/">
+    //         {completeDisplay}
 
-            <div style={{ padding: 8, marginTop: 32 }}>
-              <div>Timeleft:</div>
-              {timeLeft && humanizeDuration(timeLeft.toNumber() * 1000)}
-            </div>
+    //         <div style={{ padding: 8, marginTop: 32 }}>
+    //           <div>Timeleft:</div>
+    //           {timeLeft && humanizeDuration(timeLeft.toNumber() * 1000)}
+    //         </div>
 
-            <div style={{ padding: 8 }}>
-              <div>Total staked:</div>
-              <Balance balance={stakerContractBalance} fontSize={64} />/<Balance balance={threshold} fontSize={64} />
-            </div>
+    //         <div style={{ padding: 8 }}>
+    //           <div>Total staked:</div>
+    //           <Balance balance={stakerContractBalance} fontSize={64} />/<Balance balance={threshold} fontSize={64} />
+    //         </div>
 
-            <div style={{ padding: 8 }}>
-              <div>You staked:</div>
-              <Balance balance={balanceStaked} fontSize={64} />
-            </div>
+    //         <div style={{ padding: 8 }}>
+    //           <div>You staked:</div>
+    //           <Balance balance={balanceStaked} fontSize={64} />
+    //         </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={"default"}
-                onClick={() => {
-                  tx(writeContracts.Staker.execute());
-                }}
-              >
-                📡 Execute!
-              </Button>
-            </div>
+    //         <div style={{ padding: 8 }}>
+    //           <Button
+    //             type={"default"}
+    //             onClick={() => {
+    //               tx(writeContracts.Staker.execute());
+    //             }}
+    //           >
+    //             📡 Execute!
+    //           </Button>
+    //         </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={"default"}
-                onClick={() => {
-                  tx(writeContracts.Staker.withdraw());
-                }}
-              >
-                🏧 Withdraw
-              </Button>
-            </div>
+    //         <div style={{ padding: 8 }}>
+    //           <Button
+    //             type={"default"}
+    //             onClick={() => {
+    //               tx(writeContracts.Staker.withdraw());
+    //             }}
+    //           >
+    //             🏧 Withdraw
+    //           </Button>
+    //         </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={balanceStaked ? "success" : "primary"}
-                onClick={() => {
-                  tx(writeContracts.Staker.stake({ value: ethers.utils.parseEther("0.5") }));
-                }}
-              >
-                🥩 Stake 0.5 ether!
-              </Button>
-            </div>
+    //         <div style={{ padding: 8 }}>
+    //           <Button
+    //             type={balanceStaked ? "success" : "primary"}
+    //             onClick={() => {
+    //               tx(writeContracts.Staker.stake({ value: ethers.utils.parseEther("0.5") }));
+    //             }}
+    //           >
+    //             🥩 Stake 0.5 ether!
+    //           </Button>
+    //         </div>
 
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
+    //         {/*
+    //             🎛 this scaffolding is full of commonly used components
+    //             this <Contract/> component will automatically parse your ABI
+    //             and give you a form to interact with it locally
+    //         */}
 
-            <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
-              <div>Stake Events:</div>
-              <List
-                dataSource={stakeEvents}
-                renderItem={item => {
-                  return (
-                    <List.Item key={item.blockNumber}>
-                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> =>
-                      <Balance balance={item.args[1]} />
-                    </List.Item>
-                  );
-                }}
-              />
-            </div>
+    //         <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
+    //           <div>Stake Events:</div>
+    //           <List
+    //             dataSource={stakeEvents}
+    //             renderItem={item => {
+    //               return (
+    //                 <List.Item key={item.blockNumber}>
+    //                   <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> =>
+    //                   <Balance balance={item.args[1]} />
+    //                 </List.Item>
+    //               );
+    //             }}
+    //           />
+    //         </div>
 
-            {/* uncomment for a second contract:
-            <Contract
-              name="SecondContract"
-              signer={userProvider.getSigner()}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-            */}
-          </Route>
-          <Route path="/contracts">
-            <Contract
-              name="Staker"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-            <Contract
-              name="ExampleExternalContract"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-          </Route>
-        </Switch>
-      </BrowserRouter>
+    //         {/* uncomment for a second contract:
+    //         <Contract
+    //           name="SecondContract"
+    //           signer={userProvider.getSigner()}
+    //           provider={localProvider}
+    //           address={address}
+    //           blockExplorer={blockExplorer}
+    //           contractConfig={contractConfig}
+    //         />
+    //         */}
+    //       </Route>
+    //       <Route path="/contracts">
+    //         <Contract
+    //           name="Staker"
+    //           signer={userSigner}
+    //           provider={localProvider}
+    //           address={address}
+    //           blockExplorer={blockExplorer}
+    //           contractConfig={contractConfig}
+    //         />
+    //         <Contract
+    //           name="ExampleExternalContract"
+    //           signer={userSigner}
+    //           provider={localProvider}
+    //           address={address}
+    //           blockExplorer={blockExplorer}
+    //           contractConfig={contractConfig}
+    //         />
+    //       </Route>
+    //       <Route path="/mine">
+    //         <Mine
+    //           timeLeft={timeLeft} 
+    //           deadline={deadline} 
+    //         />
+    //       </Route>
+    //     </Switch>
+    //   </BrowserRouter>
 
-      <ThemeSwitch />
+    //   <ThemeSwitch />
 
-      {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
-        <Account
-          address={address}
-          localProvider={localProvider}
-          userSigner={userSigner}
-          mainnetProvider={mainnetProvider}
-          price={price}
-          web3Modal={web3Modal}
-          loadWeb3Modal={loadWeb3Modal}
-          logoutOfWeb3Modal={logoutOfWeb3Modal}
-          blockExplorer={blockExplorer}
-        />
-        {faucetHint}
-      </div>
+    //   {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
+    //   <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
+    //     <Account
+    //       address={address}
+    //       localProvider={localProvider}
+    //       userSigner={userSigner}
+    //       mainnetProvider={mainnetProvider}
+    //       price={price}
+    //       web3Modal={web3Modal}
+    //       loadWeb3Modal={loadWeb3Modal}
+    //       logoutOfWeb3Modal={logoutOfWeb3Modal}
+    //       blockExplorer={blockExplorer}
+    //     />
+    //     {faucetHint}
+    //   </div>
 
-      <div style={{ marginTop: 32, opacity: 0.5 }}>
-        {/* Add your address here */}
-        Created by <Address value={"Your...address"} ensProvider={mainnetProvider} fontSize={16} />
-      </div>
+    //   <div style={{ marginTop: 32, opacity: 0.5 }}>
+    //     {/* Add your address here */}
+    //     Created by <Address value={"Your...address"} ensProvider={mainnetProvider} fontSize={16} />
+    //   </div>
 
-      <div style={{ marginTop: 32, opacity: 0.5 }}>
-        <a target="_blank" style={{ padding: 32, color: "#000" }} href="https://github.com/scaffold-eth/scaffold-eth">
-          🍴 Fork me!
-        </a>
-      </div>
+    //   <div style={{ marginTop: 32, opacity: 0.5 }}>
+    //     <a target="_blank" style={{ padding: 32, color: "#000" }} href="https://github.com/scaffold-eth/scaffold-eth">
+    //       🍴 Fork me!
+    //     </a>
+    //   </div>
 
-      {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={8}>
-            <Ramp price={price} address={address} networks={NETWORKS} />
-          </Col>
+    //   {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
+    //   <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
+    //     <Row align="middle" gutter={[4, 4]}>
+    //       <Col span={8}>
+    //         <Ramp price={price} address={address} networks={NETWORKS} />
+    //       </Col>
 
-          <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
-            <GasGauge gasPrice={gasPrice} />
-          </Col>
-          <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
-            <Button
-              onClick={() => {
-                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
-              }}
-              size="large"
-              shape="round"
-            >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
-                💬
-              </span>
-              Support
-            </Button>
-          </Col>
-        </Row>
+    //       <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
+    //         <GasGauge gasPrice={gasPrice} />
+    //       </Col>
+    //       <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
+    //         <Button
+    //           onClick={() => {
+    //             window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
+    //           }}
+    //           size="large"
+    //           shape="round"
+    //         >
+    //           <span style={{ marginRight: 8 }} role="img" aria-label="support">
+    //             💬
+    //           </span>
+    //           Support
+    //         </Button>
+    //       </Col>
+    //     </Row>
 
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={24}>
-            {
-              /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
-                <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
-              ) : (
-                ""
-              )
-            }
-          </Col>
-        </Row>
-      </div>
-    </div>
+    //     <Row align="middle" gutter={[4, 4]}>
+    //       <Col span={24}>
+    //         {
+    //           /*  if the local provider has a signer, let's show the faucet:  */
+    //           faucetAvailable ? (
+    //             <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
+    //           ) : (
+    //             ""
+    //           )
+    //         }
+    //       </Col>
+    //     </Row>
+    //   </div>
+    // </div>
   );
 }
 
