@@ -6,7 +6,7 @@ import "./ExampleExternalContract.sol"; //https://github.com/OpenZeppelin/openze
 contract Staker {
     ExampleExternalContract public exampleExternalContract;
 
-    uint256 public constant threshold = 3000000000000000000;
+    uint256 public constant threshold = 3000000000000000000000;
     uint256 public immutable DEADLINE;
     bool hasBeenExecuted = false;
 
@@ -16,7 +16,7 @@ contract Staker {
         exampleExternalContract = ExampleExternalContract(
             exampleExternalContractAddress
         );
-        DEADLINE = block.timestamp + 6000;
+        DEADLINE = block.timestamp + 600000;
     }
 
     modifier passedDeadline() {
@@ -55,7 +55,6 @@ contract Staker {
     // if the `threshold` was not met, allow everyone to call a `withdraw()` function
 
     function withdraw() public passedDeadline {
-        require(hasBeenExecuted, "CAN'T WITHDRAW FUNDS YET");
         (bool sent, bytes memory _) = payable(msg.sender).call{
             value: balances[msg.sender]
         }("");
