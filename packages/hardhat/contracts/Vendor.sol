@@ -20,7 +20,7 @@ contract Vendor is Ownable {
     emit BuyTokens(msg.sender, msg.value, numTokens);
   }
 
-  function withdraw() public {
+  function withdraw() onlyOwner public {
     msg.sender.call{value: address(this).balance}("");
   }
 
@@ -28,6 +28,7 @@ contract Vendor is Ownable {
     yourToken.transferFrom(msg.sender, address(this), amount);
     uint256 amountEth = (amount * 10 ** 18) / tokensPerEth;
     msg.sender.call{value: amountEth}("");
+    emit SellTokens(msg.sender, amountETH, amount);
   }
 
 }

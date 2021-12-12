@@ -19,7 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   console.log("\n 🤹  Sending ownership to frontend address...\n")
   //ToDo: change address with your burner wallet address vvvv
-  // await vendor.transferOwnership( "0x89e70175eDF7D6a187fDA142c1BBD94F8D709d9c" );
+  await vendor.transferOwnership( "0x89e70175eDF7D6a187fDA142c1BBD94F8D709d9c" );
 };
 
 module.exports.tags = ["Vendor"];
