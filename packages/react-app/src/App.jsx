@@ -266,6 +266,7 @@ function App(props) {
   const yourTokenBalance = useContractReader(readContracts, "YourToken", "balanceOf", [address]);
   console.log("🏵 yourTokenBalance:", yourTokenBalance ? ethers.utils.formatEther(yourTokenBalance) : "...");
 
+  console.log({readContracts});
   const tokensPerEth = useContractReader(readContracts, "Vendor", "tokensPerEth");
   console.log("🏦 tokensPerEth:", tokensPerEth ? tokensPerEth.toString() : "...");
 
@@ -602,6 +603,52 @@ function App(props) {
                   </Button>
                 </div>
               </Card>
+              <Divider />
+            <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
+              <Card title="Sell Tokens">
+                <div style={{ padding: 8 }}>{tokensPerEth && tokensPerEth.toNumber()} tokens per ETH</div>
+                <div style={{ padding: 8 }}>
+                  <Input
+                    style={{ textAlign: "center" }}
+                    placeholder={"amount of tokens to sell"}
+                    value={tokenSellAmount}
+                    onChange={e => {
+                      setTokenSellAmount(e.target.value);
+                    }}
+                  />
+                  <Balance balance={ethCostToPurchaseTokens} dollarMultiplier={price} />
+                </div>
+                {isSellAmountApproved?
+                  <div style={{ padding: 8 }}>
+                    <Button
+                      type={"primary"}
+                      loading={buying}
+                      onClick={async () => {
+                        setBuying(true);
+                        await tx(writeContracts.Vendor.sellTokens(tokenSellAmount && ethers.utils.parseEther(tokenSellAmount)));
+                        setBuying(false);
+                      }}
+                    >
+                      Sell Tokens
+                    </Button>
+                  </div>
+                  :
+                  <div style={{ padding: 8 }}>
+                    <Button
+                      type={"primary"}
+                      loading={buying}
+                      onClick={async () => {
+                        setBuying(true);
+                        await tx(writeContracts.YourToken.approve(readContracts.Vendor.address, tokenSellAmount && ethers.utils.parseEther(tokenSellAmount)));
+                        setBuying(false);
+                      }}
+                    >
+                      Approve Tokens
+                    </Button>
+                  </div>
+                }
+              </Card>
+            </div>
             </div>
 
             <div style={{ padding: 8, marginTop: 32 }}>
