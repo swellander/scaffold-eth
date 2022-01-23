@@ -198,7 +198,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
                 }
                 return value;
               });
-
+              console.log({args});
               let result;
               if (functionInfo.stateMutability === "view" || functionInfo.stateMutability === "pure") {
                 try {
