@@ -1,12 +1,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-import "hardhat/console.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol"; 
-// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol
-
 contract MultiSigWallet {
-  address[] public owners;
   uint public numConfirmationsRequired;
   mapping(address => bool) public isOwner;
   mapping(uint => mapping(address => bool)) isConfirmed;
@@ -28,7 +23,12 @@ contract MultiSigWallet {
     _;
   }
 
-  modifier isntYetConfirmed(uint txIndex, address _owner) {
+  modifier txConfirmedByOwner(uint txIndex, address _owner) {
+    require(isConfirmed[txIndex][_owner]);
+    _;
+  }
+
+  modifier txNotConfirmedByOwner(uint txIndex, address _owner) {
     require(!isConfirmed[txIndex][_owner]);
     _;
   }
@@ -39,14 +39,12 @@ contract MultiSigWallet {
   }
 
   constructor(address[] memory _owners, uint _numConfirmationsRequired) {
-    owners = _owners;
     numConfirmationsRequired = _numConfirmationsRequired;
-    for (uint i = 0; i < owners.length; i++) {
-      isOwner[owners[i]] = true;
+    for (uint i = 0; i < _owners.length; i++) {
+      isOwner[_owners[i]] = true;
     }
   }
 
-  // submitTransaction
   function submitTransaction (address _to, uint _value) onlyOwner(msg.sender) public {
     transactions.push(Transaction({
       to: _to,
@@ -56,15 +54,16 @@ contract MultiSigWallet {
     }));
   }
 
-  function approveTransaction(uint _txIndex) isntYetConfirmed(_txIndex, msg.sender) onlyOwner(msg.sender) public {
+  function approveTransaction(uint _txIndex) onlyOwner(msg.sender) txNotConfirmedByOwner(_txIndex, msg.sender) public {
     Transaction storage transaction = transactions[_txIndex];
     transaction.numConfirmations += 1;
     isConfirmed[_txIndex][msg.sender] = true;
   }
 
-  function denyTransaction(uint _txIndex) public {
+  function denyTransaction(uint _txIndex) onlyOwner(msg.sender) txConfirmedByOwner(_txIndex, msg.sender) public {
     Transaction storage transaction = transactions[_txIndex];
     transaction.numConfirmations -= 1;
+    isConfirmed[_txIndex][msg.sender] = false;
   }
 
   function executeTransaction(uint _txIndex) txIsConfirmed(_txIndex) public {
