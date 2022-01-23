@@ -12,6 +12,7 @@ contract MultiSigWallet {
     bool executed;
     uint numConfirmations;
     uint value;
+    bytes data;
   }
 
   receive() external payable {
@@ -45,12 +46,13 @@ contract MultiSigWallet {
     }
   }
 
-  function submitTransaction (address _to, uint _value) onlyOwner(msg.sender) public {
+  function submitTransaction (address _to, uint _value, bytes memory _data) onlyOwner(msg.sender) public {
     transactions.push(Transaction({
       to: _to,
       value: _value,
       numConfirmations: 0,
-      executed: false
+      executed: false,
+      data: _data
     }));
   }
 
@@ -69,10 +71,10 @@ contract MultiSigWallet {
   function executeTransaction(uint _txIndex) txIsConfirmed(_txIndex) public {
     Transaction storage transaction = transactions[_txIndex];
     require(!transaction.executed, "Transaction was already executed.");
+
     (bool success, bytes memory data) = transaction.to.call{value: transaction.value}("");
-    console.log("To", transaction.to);
-    console.log("Success", success);
     require(success, "Transaction Failed...");
+
     transaction.executed = true;
   }
 }
