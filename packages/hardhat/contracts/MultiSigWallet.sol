@@ -1,7 +1,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
+
 contract MultiSigWallet {
+  event Deposit(uint amount, address from);
+
   uint public numConfirmationsRequired;
   mapping(address => bool) public isOwner;
   mapping(uint => mapping(address => bool)) isConfirmed;
@@ -16,7 +19,7 @@ contract MultiSigWallet {
   }
 
   receive() external payable {
-
+    emit Deposit(msg.value, msg.sender);
   }
 
   modifier onlyOwner(address _address) {

@@ -156,7 +156,7 @@ export default function ExampleUI({
       <Events
         contracts={readContracts}
         contractName="MultiSigWallet"
-        eventName="SetPurpose"
+        eventName="Deposit"
         localProvider={localProvider}
         mainnetProvider={mainnetProvider}
         startBlock={1}
