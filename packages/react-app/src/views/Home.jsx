@@ -1,84 +1,70 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useContractReader } from "eth-hooks";
-import { ethers } from "ethers";
+import React, { useState, useEffect } from "react";
+import { Grid, TextField, Button, Chip } from '@mui/material';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import Address from '../components/Address';
+import { useHistory } from 'react-router-dom';
 
-/**
- * web3 props can be passed from '../App.jsx' into your local view component for use
- * @param {*} yourLocalBalance balance on current network
- * @param {*} readContracts contracts from current chain already pre-loaded using ethers contract module. More here https://docs.ethers.io/v5/api/contract/contract/
- * @returns react component
- */
-function Home({ yourLocalBalance, readContracts }) {
-  // you can also use hooks locally in your component of choice
-  // in this case, let's keep track of 'purpose' variable from our contract
-  const purpose = useContractReader(readContracts, "MultiSigWallet", "purpose");
+
+function Home({ readContracts, writeContracts }) {
+  const history = useHistory();
+  const { MultiSigWalletFactory } = readContracts;
+  const [wallets, setWallets] = useState([]);
+  const [owners, setOwners] = useState([]);
+  const [newOwner, setNewOwner] = useState('');
+  const [numConfirmations, setNumConfirmations] = useState(0);
+
+  const handleAddOwner = () => {
+    setOwners([...owners, newOwner]);
+    setNewOwner('');
+  }
+  const handleCreateContract = async () => {
+    const txData = await writeContracts.MultiSigWalletFactory.create(owners, numConfirmations);
+    console.log({txData})
+  }
+  const handleClickWallet = walletAddress => history.push('/wallet/' + walletAddress);
+
+  useEffect(async () => {
+    const existingWallets = await readContracts.MultiSigWalletFactory?.getWallets();
+    setWallets(existingWallets || []);
+  }, [MultiSigWalletFactory]);
 
   return (
-    <div>
-      <div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>📝</span>
-        This Is Your App Home. You can start editing it in{" "}
-        <span
-          className="highlight"
-          style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-        >
-          packages/react-app/src/views/Home.jsx
-        </span>
-      </div>
-      {!purpose?<div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>👷‍♀️</span>
-        You haven't deployed your contract yet, run
-        <span
-          className="highlight"
-          style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-        >
-          yarn chain
-        </span> and <span
-            className="highlight"
-            style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-          >
-            yarn deploy
-          </span> to deploy your first contract!
-      </div>:<div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>🤓</span>
-        The "purpose" variable from your contract is{" "}
-        <span
-          className="highlight"
-          style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-        >
-          {purpose}
-        </span>
-      </div>}
-
-      <div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>🤖</span>
-        An example prop of your balance{" "}
-        <span style={{ fontWeight: "bold", color: "green" }}>({ethers.utils.formatEther(yourLocalBalance)})</span> was
-        passed into the
-        <span
-          className="highlight"
-          style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-        >
-          Home.jsx
-        </span>{" "}
-        component from
-        <span
-          className="highlight"
-          style={{ marginLeft: 4, /* backgroundColor: "#f9f9f9", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
-        >
-          App.jsx
-        </span>
-      </div>
-      <div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>💭</span>
-        Check out the <Link to="/hints">"Hints"</Link> tab for more tips.
-      </div>
-      <div style={{ margin: 32 }}>
-        <span style={{ marginRight: 8 }}>🛠</span>
-        Tinker with your smart contract using the <Link to="/debug">"Debug Contract"</Link> tab.
-      </div>
-    </div>
+    <Grid container>
+      <Grid xs={6} container>
+        <h3>Existing Wallets</h3>
+        {wallets.map(wallet => (
+          <Grid xs={12}>
+            <Chip
+              icon={<AccountBalanceWalletIcon/>}
+              label={wallet}
+              onClick={() => handleClickWallet(wallet)}
+            />
+          </Grid>
+        ))}
+      </Grid>
+      <Grid xs={6}>
+        <h3>Create Multi-Sig Wallet</h3>
+        <Grid>
+        <TextField
+          type="number"
+          value={numConfirmations}
+          onChange={e => setNumConfirmations(e.target.value)}
+        />
+        </Grid>
+        <Grid>
+        <TextField
+          value={newOwner}
+          onChange={e => setNewOwner(e.target.value)}
+        />
+        <Button
+          onClick={handleAddOwner}
+        >Add Owner</Button>
+        </Grid>
+        <Button onClick={handleCreateContract}>Create Contract</Button>
+      </Grid>
+      <h3>Owners</h3>
+      {owners.map(owner => <Address address={owner}/>)}
+    </Grid>
   );
 }
 

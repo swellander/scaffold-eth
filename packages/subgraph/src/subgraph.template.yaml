@@ -3,11 +3,11 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: MultiSigWallet
+    name: MultiSigWalletFactory
     network: localhost
     source:
-      address: "{{localhost_MultiSigWalletAddress}}"
-      abi: MultiSigWallet
+      address: "{{localhost_MultiSigWalletFactoryAddress}}"
+      abi: MultiSigWalletFactory
       startBlock: 1
     mapping:
       kind: ethereum/events
@@ -17,8 +17,8 @@ dataSources:
         - Purpose
         - Sender
       abis:
-        - name: MultiSigWallet
-          file: ./abis/localhost_MultiSigWallet.json
+        - name: MultiSigWalletFactory
+          file: ./abis/localhost_MultiSigWalletFactory.json
       eventHandlers:
         - event: SetPurpose(address,string)
           handler: handleSetPurpose

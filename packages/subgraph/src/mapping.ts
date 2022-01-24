@@ -1,8 +1,8 @@
 import { BigInt, Address } from "@graphprotocol/graph-ts";
 import {
-  MultiSigWallet,
+  MultiSigWalletFactory,
   SetPurpose,
-} from "../generated/MultiSigWallet/MultiSigWallet";
+} from "../generated/MultiSigWalletFactory/MultiSigWalletFactory";
 import { Purpose, Sender } from "../generated/schema";
 
 export function handleSetPurpose(event: SetPurpose): void {

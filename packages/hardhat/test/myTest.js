@@ -12,11 +12,11 @@ describe("My Dapp", function () {
     setTimeout(done, 2000);
   });
 
-  describe("MultiSigWallet", function () {
-    it("Should deploy MultiSigWallet", async function () {
-      const MultiSigWallet = await ethers.getContractFactory("MultiSigWallet");
+  describe("MultiSigWalletFactory", function () {
+    it("Should deploy MultiSigWalletFactory", async function () {
+      const MultiSigWalletFactory = await ethers.getContractFactory("MultiSigWalletFactory");
 
-      myContract = await MultiSigWallet.deploy();
+      myContract = await MultiSigWalletFactory.deploy();
     });
 
     describe("setPurpose()", function () {
@@ -27,7 +27,7 @@ describe("My Dapp", function () {
         expect(await myContract.purpose()).to.equal(newPurpose);
       });
 
-      // Uncomment the event and emit lines in MultiSigWallet.sol to make this test pass
+      // Uncomment the event and emit lines in MultiSigWalletFactory.sol to make this test pass
 
       /*it("Should emit a SetPurpose event ", async function () {
         const [owner] = await ethers.getSigners();

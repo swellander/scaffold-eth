@@ -61,7 +61,7 @@ docker run \
   -ti node:16
 ```
 
-🔏 Edit your smart contract `MultiSigWallet.sol` in `packages/hardhat/contracts`
+🔏 Edit your smart contract `MultiSigWalletFactory.sol` in `packages/hardhat/contracts`
 
 📝 Edit your frontend `App.jsx` in `packages/react-app/src`
 

@@ -37,7 +37,7 @@ export default function ExampleUI({
             onClick={async () => {
               /* look how you call setPurpose on your contract: */
               /* notice how you pass a call back for tx updates too */
-              const result = tx(writeContracts.MultiSigWallet.setPurpose(newPurpose), update => {
+              const result = tx(writeContracts.MultiSigWalletFactory.setPurpose(newPurpose), update => {
                 console.log("📡 Transaction Update:", update);
                 if (update && (update.status === "confirmed" || update.status === 1)) {
                   console.log(" 🍾 Transaction " + update.hash + " finished!");
@@ -83,7 +83,7 @@ export default function ExampleUI({
         <Divider />
         Your Contract Address:
         <Address
-          address={readContracts && readContracts.MultiSigWallet ? readContracts.MultiSigWallet.address : null}
+          address={readContracts && readContracts.MultiSigWalletFactory ? readContracts.MultiSigWalletFactory.address : null}
           ensProvider={mainnetProvider}
           fontSize={16}
         />
@@ -92,7 +92,7 @@ export default function ExampleUI({
           <Button
             onClick={() => {
               /* look how you call setPurpose on your contract: */
-              tx(writeContracts.MultiSigWallet.setPurpose("🍻 Cheers"));
+              tx(writeContracts.MultiSigWalletFactory.setPurpose("🍻 Cheers"));
             }}
           >
             Set Purpose to &quot;🍻 Cheers&quot;
@@ -106,7 +106,7 @@ export default function ExampleUI({
               here we are sending value straight to the contract's address:
             */
               tx({
-                to: writeContracts.MultiSigWallet.address,
+                to: writeContracts.MultiSigWalletFactory.address,
                 value: utils.parseEther("0.001"),
               });
               /* this should throw an error about "no fallback nor receive function" until you add it */
@@ -120,7 +120,7 @@ export default function ExampleUI({
             onClick={() => {
               /* look how we call setPurpose AND send some value along */
               tx(
-                writeContracts.MultiSigWallet.setPurpose("💵 Paying for this one!", {
+                writeContracts.MultiSigWalletFactory.setPurpose("💵 Paying for this one!", {
                   value: utils.parseEther("0.001"),
                 }),
               );
@@ -135,9 +135,9 @@ export default function ExampleUI({
             onClick={() => {
               /* you can also just craft a transaction and send it to the tx() transactor */
               tx({
-                to: writeContracts.MultiSigWallet.address,
+                to: writeContracts.MultiSigWalletFactory.address,
                 value: utils.parseEther("0.001"),
-                data: writeContracts.MultiSigWallet.interface.encodeFunctionData("setPurpose(string)", [
+                data: writeContracts.MultiSigWalletFactory.interface.encodeFunctionData("setPurpose(string)", [
                   "🤓 Whoa so 1337!",
                 ]),
               });
@@ -151,11 +151,11 @@ export default function ExampleUI({
 
       {/*
         📑 Maybe display a list of events?
-          (uncomment the event and emit line in MultiSigWallet.sol! )
+          (uncomment the event and emit line in MultiSigWalletFactory.sol! )
       */}
       <Events
         contracts={readContracts}
-        contractName="MultiSigWallet"
+        contractName="MultiSigWalletFactory"
         eventName="Deposit"
         localProvider={localProvider}
         mainnetProvider={mainnetProvider}

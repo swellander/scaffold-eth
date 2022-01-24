@@ -11,7 +11,7 @@ import { Address } from "../components";
 
   <Events
     contracts={readContracts}
-    contractName="MultiSigWallet"
+    contractName="MultiSigWalletFactory"
     eventName="SetPurpose"
     localProvider={localProvider}
     mainnetProvider={mainnetProvider}
@@ -21,8 +21,10 @@ import { Address } from "../components";
 
 export default function Events({ contracts, contractName, eventName, localProvider, mainnetProvider, startBlock }) {
   // 📟 Listen for broadcast events
-  const events = useEventListener(contracts, contractName, eventName, localProvider, startBlock);
-  console.log({events})
+  const depositEvents = useEventListener(contracts, contractName, eventName, localProvider, startBlock);
+  const approvalEvents = useEventListener(contracts, 'TransactionApproved', eventName, localProvider, startBlock);
+
+  const events = depositEvents + approvalEvents;
 
   return (
     <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
